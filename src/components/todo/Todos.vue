@@ -5,13 +5,13 @@
              <h1>TodoList</h1>
             <input type="text" class="new-todo" placeholder="Ajouter une tache" v-model="newTodo" @keyup.enter="addTodo"/>
             <ul class="todo-list">
-            <li class="todo" v-for="todo in filterdTodos" :key="todo.name" :class="{completed:todo.completed}">
+            <li class="todo" v-for="todo in filterdTodos" :key="todo.name" :class="{completed:todo.completed,editing:todo===editing}">
                 <div class="view">
                     <input type="checkbox" v-model="todo.completed" class="toggle"/>
-                   <label>{{todo.name}}</label>
+                   <label @dblclick="editTodo(todo)">{{todo.name}}</label>
                    <button class="destroy" @click.prevent="deleteTodo"></button>
                 </div>
-                <input type="text" class="edit" v-model="todo.name">
+                <input type="text" class="edit" v-model="todo.name" @keyup="quitEdit" v-focus="editing:todo===editing">
             </li>
         </ul>
         <slot></slot>
@@ -33,6 +33,7 @@
      
 </template>
 <script>
+import Vue from "vue";
 export default {
     name:"Todos",
     data(){
@@ -44,6 +45,7 @@ export default {
                ],
             newTodo:"",
             filter:"all",
+            editing:'',
         };
     },
     methods:{
@@ -60,6 +62,12 @@ export default {
         },
         deleteTodoCompled:()=>{
             return this.todos.filter(todo=>todo.completed);
+        },
+        editTodo(todo){
+            this.editing=todo;
+        },
+        quitEdit(){
+            this.editing=null;
         }
        
     },
@@ -91,6 +99,15 @@ export default {
         },
         hasTodos(){
             return this.todos.length>0
+        }
+    },
+    directives:{
+        focus(element,value){
+            if(value){
+               Vue.nextTick(_=>{ // permet de focuser et eviter des comportements innatendus
+                   element.focus();
+               })
+            }
         }
     }
    
